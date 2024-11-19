@@ -1,0 +1,11 @@
+[package]
+name = "toms_data_onion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+layer0 = {path = "./layer0"}
+layer1 = {path = "./layer1"}
+layer2 = {path = "./layer2"}
+layer3 = {path = "./layer3"}
+layer4 = {path = "./layer4"}

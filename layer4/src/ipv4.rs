@@ -1,7 +1,7 @@
 use std::net::Ipv4Addr;
 use crate::udp::UDPHeader;
+use crate::utils::{ChecksumResult, calculate_checksum};
 
-type ChecksumResult<T> = Result<T, T>;
 
 #[derive(Debug)]
 pub struct IPv4Header {
@@ -22,33 +22,7 @@ pub struct IPv4Header {
     // Options
     pub options: Vec<u8>,
 
-    pub data: UDPHeader,
-}
-
-fn calculate_checksum(headers: &[u8]) -> u16 {
-    let mut sum = headers
-        .chunks(2)
-        .map(|bytes| {
-            let word = if bytes.len() == 1 {
-                u16::from_be_bytes([bytes[0], 0])
-            } else {
-                u16::from_be_bytes([bytes[0], bytes[1]])
-            };
-            u32::from(word)
-        })
-        .fold(0u32, |acc, word| {
-            let sum = acc + word;
-            let output = if sum >> 16 != 0 {
-                (sum & 0xFFFF) + (sum >> 16)
-            } else {
-                sum
-            };
-            output
-        });
-    while (sum >> 16) != 0 {
-        sum = (sum & 0xFFFF) + (sum >> 16);
-    }
-    !(sum) as u16
+    pub data: Option<UDPHeader>,
 }
 
 impl IPv4Header {
@@ -66,6 +40,14 @@ impl IPv4Header {
 
         let header_checksum = (u16::from(bytes[10]) << 8) | bytes[11] as u16;
         let expected_checksum = calculate_checksum(&checksum_slice);
+
+        let source_address = Ipv4Addr::from_bits(u32::from_be_bytes([
+            bytes[12], bytes[13], bytes[14], bytes[15],
+        ]));
+        let destination_address= Ipv4Addr::from_bits(u32::from_be_bytes([
+            bytes[16], bytes[17], bytes[18], bytes[19],
+        ]));
+
         let output = Self {
             version: bytes[0] >> 4,
             ihl,
@@ -78,19 +60,16 @@ impl IPv4Header {
             ttl: bytes[8],
             protocol: bytes[9],
             header_checksum,
-            source_address: Ipv4Addr::from_bits(u32::from_be_bytes([
-                bytes[12], bytes[13], bytes[14], bytes[15],
-            ])),
-            destination_address: Ipv4Addr::from_bits(u32::from_be_bytes([
-                bytes[16], bytes[17], bytes[18], bytes[19],
-            ])),
-            options: options,
-            data: UDPHeader::from(&data),
+            source_address,
+            destination_address,
+            options,
+            data: UDPHeader::from(&data, source_address, destination_address),
         };
 
         if expected_checksum != header_checksum
             || output.source_address != Ipv4Addr::new(10, 1, 1, 10)
             || output.destination_address != Ipv4Addr::new(10, 1, 1, 200)
+            || output.data.is_none()
         {
             return Err(output);
         }

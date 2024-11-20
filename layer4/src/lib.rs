@@ -4,7 +4,7 @@ mod utils;
 
 use crate::ipv4::IPv4Header;
 
-pub fn decrypt(input: &[u8]) -> Vec<u8> {
+pub fn get_data(input: &[u8]) -> Vec<u8> {
     let mut offset = 0;
     let mut payloads = vec![];
     let mut invalid_payloads = vec![];
@@ -22,5 +22,7 @@ pub fn decrypt(input: &[u8]) -> Vec<u8> {
         payloads.push(payload)
     }
 
-    vec![]
+    let output = payloads.iter().flat_map(|packet| packet.data.iter().flatten()).cloned().collect::<Vec<_>>();
+
+    output
 }

@@ -49,7 +49,8 @@ fn main() {
         "4" => {
             let layer4_string = get_file_content("./inputs/layer4.txt");
             layer0::decode_ascii85(layer4_string)
-                .map(|layer4_input| layer4::decrypt(&layer4_input))
+                .map(|layer4_input| layer4::get_data(&layer4_input))
+                .map(|output| write_file_content("./outputs/layer4.txt", &output))
                 .unwrap();
         }
         _ => {

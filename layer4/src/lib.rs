@@ -11,8 +11,8 @@ pub fn get_data(input: &[u8]) -> Vec<u8> {
     while offset < input.len() {
         let payload = match IPv4Header::from(&input[offset..]) {
             Ok(x) => x,
-            Err(e) => {
-                offset += e.total_length as usize;
+            Err(length) => {
+                offset += length as usize;
                 invalid_payloads.push(e);
                 continue;
             }

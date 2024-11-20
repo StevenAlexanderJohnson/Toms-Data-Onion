@@ -1,5 +1,3 @@
-pub type ChecksumResult<T> = Result<T, T>;
-
 pub fn calculate_checksum(headers: &[u8]) -> u16 {
     let mut sum = headers
         .chunks(2)

@@ -9,3 +9,5 @@ layer1 = {path = "./layer1"}
 layer2 = {path = "./layer2"}
 layer3 = {path = "./layer3"}
 layer4 = {path = "./layer4"}
+layer5 = {path = "./layer5"}
+openssl = "0.10"

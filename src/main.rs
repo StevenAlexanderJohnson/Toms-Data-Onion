@@ -53,6 +53,13 @@ fn main() {
                 .map(|output| write_file_content("./outputs/layer4.txt", &output))
                 .unwrap();
         }
+        "5" => {
+            let layer5_string = get_file_content("./inputs/layer5.txt");
+            layer0::decode_ascii85(layer5_string)
+                .map(|layer5_input| layer5::decrypt(&layer5_input))
+                .map(|output| write_file_content("./outputs/layer5.txt", &output))
+                .unwrap();
+        }
         _ => {
             eprintln!("Invalid layer");
             std::process::exit(1);

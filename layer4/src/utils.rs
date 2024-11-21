@@ -11,12 +11,11 @@ pub fn calculate_checksum(headers: &[u8]) -> u16 {
         })
         .fold(0u32, |acc, word| {
             let sum = acc + word;
-            let output = if sum >> 16 != 0 {
+            if sum >> 16 != 0 {
                 (sum & 0xFFFF) + (sum >> 16)
             } else {
                 sum
-            };
-            output
+            }
         });
     while (sum >> 16) != 0 {
         sum = (sum & 0xFFFF) + (sum >> 16);

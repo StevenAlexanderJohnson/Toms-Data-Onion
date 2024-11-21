@@ -16,15 +16,15 @@ impl UDPPseudoHeader {
             source_address,
             destination_address,
             zeroes: 0u8,
-            protocol: 17,
+            protocol: 0x11,
             udp_length,
         }
     }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut output = vec![];
-        output.extend_from_slice(&self.source_address.octets());
         output.extend_from_slice(&self.destination_address.octets());
+        output.extend_from_slice(&self.source_address.octets());
         output.extend_from_slice(&self.zeroes.to_be_bytes());
         output.extend_from_slice(&self.protocol.to_be_bytes());
         output.extend_from_slice(&self.udp_length.to_be_bytes());
@@ -37,6 +37,7 @@ pub fn validate_udp_data(bytes: &[u8], source_address: Ipv4Addr, destination_add
     let source_port = (u16::from(bytes[0]) << 8) | bytes[1] as u16;
     let destination_port = (u16::from(bytes[2]) << 8) | bytes[3] as u16;
     let length = (u16::from(bytes[4]) << 8) | bytes[5] as u16;
+    let expected_checksum = u16::from(bytes[6]) << 8 | u16::from(bytes[7]);
     let data = Vec::from(&bytes[8..]);
     if destination_port != 42069 {
         return None;
@@ -52,11 +53,7 @@ pub fn validate_udp_data(bytes: &[u8], source_address: Ipv4Addr, destination_add
         checksum_bytes.push(0x0);
     }
 
-    let calculated_checksum = calculate_checksum(&checksum_bytes);
-    let calculated_checksum = if calculated_checksum == 0 { 0xFFFF } else { calculated_checksum };
-    let expected_checksum = u16::from(bytes[6]) << 8 | u16::from(bytes[7]);
-
-    if calculated_checksum != expected_checksum {
+    if calculate_checksum(&checksum_bytes) != expected_checksum {
         return None;
     }
 

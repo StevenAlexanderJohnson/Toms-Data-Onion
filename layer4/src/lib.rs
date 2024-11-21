@@ -13,7 +13,7 @@ pub fn get_data(input: &[u8]) -> Vec<u8> {
             Ok(x) => x,
             Err(length) => {
                 offset += length as usize;
-                invalid_payloads.push(e);
+                invalid_payloads.push(length);
                 continue;
             }
         };

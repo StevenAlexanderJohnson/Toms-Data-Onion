@@ -38,7 +38,7 @@ impl IPv4Header {
         if expected_checksum != header_checksum
             || source_address != Ipv4Addr::new(10, 1, 1, 10)
             || destination_address != Ipv4Addr::new(10, 1, 1, 200)
-            || output.data.is_none()
+            || data.is_none()
         {
             return Err(total_length);
         }

@@ -75,6 +75,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "layer6"
+version = "0.1.0"
+
+[[package]]
 name = "libc"
 version = "0.2.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -175,6 +179,7 @@ dependencies = [
  "layer3",
  "layer4",
  "layer5",
+ "layer6",
  "openssl",
 ]
 

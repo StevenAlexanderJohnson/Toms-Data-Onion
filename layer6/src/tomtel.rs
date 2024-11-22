@@ -95,14 +95,11 @@ impl Tomtel {
             5 => self.e,
             6 => self.f,
             7 => return Some(MemoryPointerResult::Read(self.ptr.wrapping_add(self.c as u32))),
-            // 7 => self.memory[self.ptr.wrapping_add(self.c as u32) as usize],
             _ => panic!("Invalid source register: {:#2x}", source),
         };
 
         if destination == 7 {
             return Some(MemoryPointerResult::Write((self.ptr.wrapping_add(self.c as u32), source_register)));
-            // self.memory[self.ptr.wrapping_add(self.c as u32) as usize] = source_register;
-            // return None;
         }
 
         match destination {
@@ -149,8 +146,6 @@ impl Tomtel {
     pub fn mvi(&mut self, value: u8, destination: u8) -> Option<MemoryPointerResult> {
         if destination == 7 {
             return Some(MemoryPointerResult::Write((self.ptr.wrapping_add(self.c as u32), value)));
-            // self.memory[self.ptr.wrapping_add(self.c as u32) as usize] = value;
-            // return None;
         }
         match destination {
             1 => self.a = value,

@@ -63,7 +63,7 @@ fn main() {
         "6" => {
             let layer6_string = get_file_content("./inputs/layer6.txt");
             layer0::decode_ascii85(layer6_string)
-                // .map(|layer6_input| layer6::execute(&layer6_input))
+                .map(|layer6_input| layer6::execute(&layer6_input))
                 .map(|output| write_file_content("./outputs/layer6.txt", &output))
                 .unwrap();
         }

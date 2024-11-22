@@ -3,10 +3,11 @@ use core::panic;
 pub type ExecutionResult = Result<(), ()>;
 
 pub enum MemoryPointerResult {
-    Read(u32),
-    Write((u32, u8)),
+    Read(u32), // address
+    Write((u32, u8)), // (address, value)
 }
 
+#[derive(Debug)]
 pub struct Tomtel {
     a: u8, // Accumulation register
     b: u8, // Operand register
@@ -52,14 +53,15 @@ impl Tomtel {
     // Opcode: 0xE1 0x__ (2 bytes)
     pub fn advance_pointer(&mut self, offset: u8) -> ExecutionResult {
         self.pc += 2;
-        self.ptr = self.ptr.wrapping_add(offset as u32);
+        // Not using wrapping_add because the overflow behaviour is undefined.
+        self.ptr = self.ptr + offset as u32;
         Ok(())
     }
 
     // Opcode: 0xC1 (1 byte)
     pub fn compare(&mut self) -> ExecutionResult {
         self.pc += 1;
-        self.f = (self.a != self.b) as u8;
+        self.f = if self.a == self.b { 0 } else { 1 };
         Ok(())
     }
 
@@ -109,7 +111,7 @@ impl Tomtel {
             5 => self.e = source_register,
             6 => self.f = source_register,
             7 => return Some(MemoryPointerResult::Write((self.ptr + self.c as u32, source_register))),
-            _ => panic!("Invalid destination register: {}", destination),
+            _ => panic!("Invalid mv destination register: {} -> {}", destination, self.pc),
         }
         None
     }
@@ -151,7 +153,7 @@ impl Tomtel {
             5 => self.e = value,
             6 => self.f = value,
             7 => return Some(MemoryPointerResult::Write((self.ptr + self.c as u32, value))),
-            _ => panic!("Invalid destination register: {}", destination),
+            _ => panic!("Invalid mvi destination register: {}", destination),
         }
 
         None

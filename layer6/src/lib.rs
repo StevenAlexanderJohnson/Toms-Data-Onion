@@ -24,34 +24,40 @@ pub fn execute(input: &[u8]) -> Vec<u8> {
                 input[instruction_pointer + 3],
                 input[instruction_pointer + 4],
             ])),
-            0b01001000..=0b01111111 => {
+            code if (code & 0b01000000 == 0b01000000) => {
                 let source = opcode & 0b00000111;
                 let destination = (opcode & 0b00111000) >> 3;
 
                 if source == 0 {
                     let value = input[instruction_pointer + 1];
                     match vm.mvi(destination, value) {
-                        Some(tomtel::MemoryPointerResult::Read(address)) => vm.mvi(destination, input[address as usize]),
+                        // If the destination was ptr+c then write the value to the memory.
                         Some(tomtel::MemoryPointerResult::Write((address, value))) => {
                             input[address as usize] = value;
-                            None
-                        },
-                        None => None,
+                        }
+                        _ => (),
                     };
+                    Ok(())
                 } else {
                     match vm.mv(source, destination) {
-                        Some(tomtel::MemoryPointerResult::Read(address)) => vm.mv(destination, input[address as usize]),
+                        Some(tomtel::MemoryPointerResult::Read(address)) => {
+                            println!(
+                                "Reading from address: {} -> {}",
+                                address, input[address as usize]
+                            );
+                            vm.mv(destination, input[address as usize])
+                        }
                         Some(tomtel::MemoryPointerResult::Write((address, value))) => {
                             input[address as usize] = value;
                             None
-                        },
+                        }
                         None => None,
                     };
-                }
 
-                Ok(())
+                    Ok(())
+                }
             }
-            0b10001000..=0b10111111 => {
+            code if (code & 0b10000000 == 0b10000000) => {
                 let source = opcode & 0b00000111;
                 let destination = (opcode & 0b00111000) >> 3;
 
@@ -70,7 +76,7 @@ pub fn execute(input: &[u8]) -> Vec<u8> {
             0x02 => vm.output(),
             0xC3 => vm.subtract(),
             0xC4 => vm.xor(),
-            _ => panic!("Unknown opcode: 0x{:02X}", opcode),
+            _ => panic!("Unknown opcode: 0x{:02X} -> {}", opcode, vm.pc()),
         };
 
         // The only time an instruction would error is if it executes a HALT instruction.
